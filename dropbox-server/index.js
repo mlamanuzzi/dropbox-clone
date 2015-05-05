@@ -21,12 +21,10 @@ if (NODE_ENV === 'development') {
 	app.use(morgan('dev'))
 }
 
-
-
 // TCP SERVER
-var port = 9838;
-var TCPHost = '127.0.0.1';
-var server = net.createServer();
+var port = 9838
+var TCPHost = '127.0.0.1'
+var server = net.createServer()
 
 // keep list of all TCP clients connected
 var clients = [];
@@ -34,16 +32,15 @@ var clients = [];
 server.listen(port);
 server.on('connection', function(socket) { //This is a standard net.Socket
     socket = new JsonSocket(socket); //Now we've decorated the net.Socket to be a JsonSocket
-    socket.name = socket.remoteAddress + ':' + socket.remotePort
-    process.stdout.write('TCPSERVER: new client connected')
+    console.log('TCPSERVER: new client connected')
     clients.push(socket)
     socket.on('message', function(message) {
-    	process.stdout.write("TCPSERVER: message received from HTTP server")
+    	console.log("TCPSERVER: message received from HTTP server")
         broadcast(message, socket)
     });
 });
 
-app.listen(PORT, () => process.stdout.write('LISTENING @ http://127.0.0.1:${PORT}'))
+app.listen(PORT, () => console.log('LISTENING @ http://127.0.0.1:' + PORT))
 
 app.head('*', setFileMeta, sendHeaders, (req, res) => res.end())
 
@@ -64,8 +61,8 @@ app.put('*', setFileMeta, setDirDetails, (req, res, next) => {
 		await mkdirp.promise(req.dirPath)
 		if (!req.isDir) {
 			req.pipe(fs.createWriteStream(req.filePath))
-			let message = createJsonMessage("create", req.filePath, "file", req._readableState.buffer.toString('base64'))
-			process.stdout.write(message)
+			let message = createJsonMessage("create", req.filePath, "file", req._readableState.buffer.toString())
+			console.log(JSON.stringify(message))
 			var socket = new JsonSocket(new net.Socket()); //Decorate a standard net.Socket with JsonSocket
 			socket.connect(port, TCPHost);
 			socket.on('connect', function() { //Don't send until we're connected
@@ -108,7 +105,7 @@ function broadcast(message, sender) {
 	clients.forEach(function (client) {
   		client.sendMessage(message);
 	});
-	process.stdout.write(message)
+	console.log(JSON.stringify(message))
 }
 
 function createJsonMessage(action, path, type, contents) {

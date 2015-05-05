@@ -5,7 +5,7 @@ let path = require('path')
 let fs = require('fs')
 let mkdirp = require('mkdirp')
 require('songbird')
-require('longjohn')
+// require('longjohn')
 
 let port = 9838;
 let host = '127.0.0.1';
@@ -18,7 +18,7 @@ let socket = new JsonSocket(netSocket)
 socket.connect(port, host)
 
 async function createFile(message) {
-  process.stdout.write(message)
+  console.log(message)
   let dirToCreate = path.dirname(path.resolve(ROOT_DIR + message.path))
   // TODO: only create directory if it does not exist
   await mkdirp.promise(dirToCreate)
@@ -34,20 +34,20 @@ async function deleteFile(message) {
 }
 
 socket.on('connect', function() { //Don't send until we're connected
-    process.stdout.write('CLIENT: connected to TCP server')
+    console.log('CLIENT: connected to TCP server')
     socket.on('message', function(message) {
-        process.stdout.write(message);
+        console.log(message);
         switch (message.action) {
           case "create" :
-            process.stdout.write('CLIENT: CREATE')
+            console.log('CLIENT: CREATE')
             createFile(message)
           break;
           case "update":
-            process.stdout.write('CLIENT: UPDATE')
+            console.log('CLIENT: UPDATE')
             createFile(message)
           break;
           case "delete":
-            process.stdout.write('CLIENT: DELETE')
+            console.log('CLIENT: DELETE')
             deleteFile(message)
           break;
         }
