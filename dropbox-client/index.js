@@ -5,7 +5,6 @@ let path = require('path')
 let fs = require('fs')
 let mkdirp = require('mkdirp')
 require('songbird')
-// require('longjohn')
 
 let port = 9838;
 let host = '127.0.0.1';
@@ -30,7 +29,7 @@ async function createFile(message) {
 
 async function deleteFile(message) {
   let fileToDelete = path.resolve(ROOT_DIR + message.path)
-    await fs.promise.unlink(fileToDelete)
+  await fs.promise.unlink(fileToDelete)
 }
 
 socket.on('connect', function() { //Don't send until we're connected
