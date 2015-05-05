@@ -50,6 +50,8 @@ app.post('*', setFileMeta, setDirDetails, (req, res, next) => {
 		if (req.isDir) return res.send(405, 'Path is a directory')
 		await fs.promise.truncate(req.filePath, 0)
 		req.pipe(fs.createWriteStream(req.filePath))
+		let message = createJsonMessage("create", req.filePath, "file", req._readableState.buffer.toString())
+		sendMessage(req, message, port, TCPHost)
 
 		res.end()
 	}().catch(next)
