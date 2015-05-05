@@ -62,12 +62,7 @@ app.put('*', setFileMeta, setDirDetails, (req, res, next) => {
 		if (!req.isDir) {
 			req.pipe(fs.createWriteStream(req.filePath))
 			let message = createJsonMessage("create", req.filePath, "file", req._readableState.buffer.toString())
-			console.log(JSON.stringify(message))
-			var socket = new JsonSocket(new net.Socket()); //Decorate a standard net.Socket with JsonSocket
-			socket.connect(port, TCPHost);
-			socket.on('connect', function() { //Don't send until we're connected
- 	    		socket.sendMessage(message);
-			});
+			sendMessage(req, message, port, TCPHost)
 		}
 		res.end()
 	}().catch(next)
@@ -91,15 +86,19 @@ app.delete('*', setFileMeta, (req, res, next) => {
 			} else {
 				await fs.promise.unlink(req.filePath)
 				let message = createJsonMessage("delete", req.filePath, "file", null)
-				var socket = new JsonSocket(new net.Socket()); 
-				socket.connect(port, TCPHost);
-				socket.on('connect', function() { 
-		    		socket.sendMessage(message);
-				});
+				sendMessage(req, message, port, TCPHost)
 			}
 			res.end()
 		}().catch(next) // only call next if failure
 })
+
+function sendMessage(req, message, port, host) {	 
+	let socket = new JsonSocket(new net.Socket()); //Decorate a standard net.Socket with JsonSocket
+	socket.connect(port, host);
+	socket.on('connect', function() { //Don't send until we're connected
+    		socket.sendMessage(message);
+	});
+}
 
 function broadcast(message, sender) {
 	clients.forEach(function (client) {
